@@ -130,7 +130,7 @@ bool hasArgsInPlural(String zero, String one, String two, String few,
   List<String> plurals = [zero, one, two, few, many, other];
 
   for (String plural in plurals) {
-    if (null != plural && ARG_REG_EXP.hasMatch(plural)) {
+    if (ARG_REG_EXP.hasMatch(plural)) {
       return true;
     }
   }
