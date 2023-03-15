@@ -1,4 +1,5 @@
 import 'package:gen_lang/extra_json_message_tool.dart';
+import 'package:gen_lang/locale_info.dart';
 
 String generateI18nDart(String getters, String supportedLocale) {
   return '''
@@ -160,7 +161,7 @@ String generateGetterGenderFunction(
 ''';
 }
 
-String generateSupportedLocale(String locale) {
+LocaleInfo parseLocale(String locale) {
   String langCode = '';
   String countryCode = '';
 
@@ -172,5 +173,9 @@ String generateSupportedLocale(String locale) {
     langCode = locale;
   }
 
-  return '''\t\t\tLocale("$langCode", "$countryCode"),''';
+  return LocaleInfo(langCode, countryCode, '');
+}
+
+String generateSupportedLocale(LocaleInfo locale) {
+  return '''\t\t\tLocale("${locale.lang}", "${locale.country}"),''';
 }

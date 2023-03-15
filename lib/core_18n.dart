@@ -6,6 +6,7 @@ import 'package:gen_lang/extra_json_file_tool.dart';
 import 'package:gen_lang/extra_json_message_tool.dart';
 import 'package:gen_lang/generate_i18n_dart.dart';
 import 'package:gen_lang/generate_message_all.dart';
+import 'package:gen_lang/locale_info.dart';
 import 'package:gen_lang/print_tool.dart';
 import 'package:path/path.dart' as path;
 
@@ -167,7 +168,6 @@ void _handleGenerateI18nDart(
   }
 
   StringBuffer getterBuilder = StringBuffer();
-  StringBuffer supportedLangBuilder = StringBuffer();
 
   // 1. Generate getters
   for (MapEntry<String, Message> entity in defaultKeyMap.entries) {
@@ -214,13 +214,24 @@ void _handleGenerateI18nDart(
     }
   }
 
-  supportedLangBuilder.writeln(generateSupportedLocale(defaultLang));
+  Set<LocaleInfo> supportedLocales = <LocaleInfo>{};
+  supportedLocales.add(parseLocale(defaultLang));
 
   // 2. Generate supported locale
-  for (var locale in validFilesMap.keys) {
+  for (final locale in validFilesMap.keys) {
     if (locale != defaultLang) {
-      supportedLangBuilder.writeln(generateSupportedLocale(locale));
+      supportedLocales.add(parseLocale(locale));
     }
+  }
+
+  final languages = supportedLocales.where((e) => e.country.isEmpty).map((e) => e.lang);
+  final additionalSupportedLocales = allLocales.where((element) => languages.contains(element.lang));
+
+  supportedLocales.addAll(additionalSupportedLocales);
+
+  StringBuffer supportedLangBuilder = StringBuffer();
+  for (final locale in supportedLocales) {
+    supportedLangBuilder.writeln(generateSupportedLocale(locale));
   }
 
   // 3. Generate i18n.dart
