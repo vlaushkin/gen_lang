@@ -4,6 +4,7 @@ String generateMessageAllDart(
     String createdMessageLookup, String deferredLibraries, String findExacts) {
   return '''
 // DO NOT EDIT. This is code generated via package:gen_lang/generate.dart
+// ignore_for_file: annotate_overrides, prefer_generic_function_type_aliases, strict_top_level_inference, unnecessary_brace_in_string_interps
 
 import 'dart:async';
 

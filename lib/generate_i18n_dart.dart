@@ -98,7 +98,7 @@ $supportedLocale
   bool shouldReload(GeneratedLocalizationsDelegate old) => false;
 }
 
-// ignore_for_file: unnecessary_brace_in_string_interps
+// ignore_for_file: unnecessary_brace_in_string_interps, non_constant_identifier_names, unnecessary_new
 ''';
 }
 
