@@ -4,6 +4,8 @@ String generateMessageAllDart(
     String createdMessageLookup, String deferredLibraries, String findExacts) {
   return '''
 // DO NOT EDIT. This is code generated via package:gen_lang/generate.dart
+// ignore_for_file: non_constant_identifier_names
+// ignore_for_file: camel_case_types
 
 import 'dart:async';
 
