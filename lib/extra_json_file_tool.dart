@@ -67,6 +67,11 @@ Map<String, FileSystemEntity> getValidStringFileMap(files) {
 
     String fileName = path.basename(file.path);
 
+    // Skip android_strings.json - it's a config file, not a translation file
+    if (fileName == 'android_strings.json') {
+      continue;
+    }
+
     if (_validateStringFileName(fileName)) {
       String locale = getLocale(fileName);
       validMap[locale] = file;

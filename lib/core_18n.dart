@@ -4,6 +4,7 @@ import 'dart:io';
 
 import 'package:gen_lang/extra_json_file_tool.dart';
 import 'package:gen_lang/extra_json_message_tool.dart';
+import 'package:gen_lang/generate_android_xml.dart';
 import 'package:gen_lang/generate_i18n_dart.dart';
 import 'package:gen_lang/generate_message_all.dart';
 import 'package:gen_lang/locale_info.dart';
@@ -14,10 +15,12 @@ class I18nOption {
   String? sourceDir;
   String? templateLocale;
   String? outputDir;
+  String? androidDir;
+  String? androidFlavor;
 
   @override
   String toString() {
-    return 'I18nOption{sourceDir: $sourceDir, templateLocale: $templateLocale, outputDir: $outputDir}';
+    return 'I18nOption{sourceDir: $sourceDir, templateLocale: $templateLocale, outputDir: $outputDir, androidDir: $androidDir, androidFlavor: $androidFlavor}';
   }
 }
 
@@ -58,6 +61,14 @@ void handleGenerateI18nFiles(I18nOption option) async {
         validFilesMap);
 
     printInfo('Finished to generate 2 files.');
+
+    // Generate Android strings if android_strings.json exists
+    await _handleGenerateAndroidStrings(
+        current.path,
+        option.sourceDir!,
+        option.androidDir!,
+        option.androidFlavor!,
+        validFilesMap);
   }
 }
 
@@ -237,4 +248,30 @@ void _handleGenerateI18nDart(
   // 3. Generate i18n.dart
   generatedFile.writeAsStringSync(generateI18nDart(
       getterBuilder.toString(), supportedLangBuilder.toString()));
+}
+
+Future<void> _handleGenerateAndroidStrings(
+    String currentPath,
+    String sourceDir,
+    String androidDir,
+    String androidFlavor,
+    Map<String, FileSystemEntity> validFilesMap) async {
+  // Read android_strings.json config
+  Set<String>? androidStringKeys =
+      await readAndroidStringsConfig(path.join(currentPath, sourceDir));
+
+  if (androidStringKeys == null || androidStringKeys.isEmpty) {
+    // No android_strings.json or it's empty - skip Android generation
+    return;
+  }
+
+  printInfo('Found ${androidStringKeys.length} keys in android_strings.json');
+
+  // Generate Android strings
+  await generateAndroidStrings(
+    path.join(currentPath, androidDir),
+    androidFlavor,
+    validFilesMap,
+    androidStringKeys,
+  );
 }

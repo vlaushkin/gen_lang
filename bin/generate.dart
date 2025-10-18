@@ -44,5 +44,15 @@ ArgParser _generateArgParser(I18nOption? i18nOption) {
       help:
           'Use string_{template-locale}.json as a template for default value when a locale does not exist. If string_en does not exist, this script will use the first string json file as a template');
 
+  parser.addOption('android-dir',
+      defaultsTo: 'android',
+      callback: (String? x) => i18nOption!.androidDir = x,
+      help: 'Path to Android project directory (relative to current directory)');
+
+  parser.addOption('android-flavor',
+      defaultsTo: 'main',
+      callback: (String? x) => i18nOption!.androidFlavor = x,
+      help: 'Android build flavor (e.g., main, dev, prod)');
+
   return parser;
 }
