@@ -67,8 +67,8 @@ Map<String, FileSystemEntity> getValidStringFileMap(files) {
 
     String fileName = path.basename(file.path);
 
-    // Skip android_strings.json - it's a config file, not a translation file
-    if (fileName == 'android_strings.json') {
+    // Skip android_strings.json and ios_strings.json - they are config files, not translation files
+    if (fileName == 'android_strings.json' || fileName == 'ios_strings.json') {
       continue;
     }
 

@@ -54,5 +54,10 @@ ArgParser _generateArgParser(I18nOption? i18nOption) {
       callback: (String? x) => i18nOption!.androidFlavor = x,
       help: 'Android build flavor (e.g., main, dev, prod)');
 
+  parser.addOption('ios-dir',
+      defaultsTo: 'ios',
+      callback: (String? x) => i18nOption!.iosDir = x,
+      help: 'Path to iOS project directory (relative to current directory)');
+
   return parser;
 }

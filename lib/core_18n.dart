@@ -6,6 +6,7 @@ import 'package:gen_lang/extra_json_file_tool.dart';
 import 'package:gen_lang/extra_json_message_tool.dart';
 import 'package:gen_lang/generate_android_xml.dart';
 import 'package:gen_lang/generate_i18n_dart.dart';
+import 'package:gen_lang/generate_ios_strings.dart';
 import 'package:gen_lang/generate_message_all.dart';
 import 'package:gen_lang/locale_info.dart';
 import 'package:gen_lang/print_tool.dart';
@@ -17,10 +18,11 @@ class I18nOption {
   String? outputDir;
   String? androidDir;
   String? androidFlavor;
+  String? iosDir;
 
   @override
   String toString() {
-    return 'I18nOption{sourceDir: $sourceDir, templateLocale: $templateLocale, outputDir: $outputDir, androidDir: $androidDir, androidFlavor: $androidFlavor}';
+    return 'I18nOption{sourceDir: $sourceDir, templateLocale: $templateLocale, outputDir: $outputDir, androidDir: $androidDir, androidFlavor: $androidFlavor, iosDir: $iosDir}';
   }
 }
 
@@ -68,6 +70,13 @@ void handleGenerateI18nFiles(I18nOption option) async {
         option.sourceDir!,
         option.androidDir!,
         option.androidFlavor!,
+        validFilesMap);
+
+    // Generate iOS strings if ios_strings.json exists
+    await _handleGenerateIosStrings(
+        current.path,
+        option.sourceDir!,
+        option.iosDir!,
         validFilesMap);
   }
 }
@@ -273,5 +282,29 @@ Future<void> _handleGenerateAndroidStrings(
     androidFlavor,
     validFilesMap,
     androidStringKeys,
+  );
+}
+
+Future<void> _handleGenerateIosStrings(
+    String currentPath,
+    String sourceDir,
+    String iosDir,
+    Map<String, FileSystemEntity> validFilesMap) async {
+  // Read ios_strings.json config
+  Set<String>? iosStringKeys =
+      await readIosStringsConfig(path.join(currentPath, sourceDir));
+
+  if (iosStringKeys == null || iosStringKeys.isEmpty) {
+    // No ios_strings.json or it's empty - skip iOS generation
+    return;
+  }
+
+  printInfo('Found ${iosStringKeys.length} keys in ios_strings.json');
+
+  // Generate iOS strings
+  await generateIosStrings(
+    path.join(currentPath, iosDir),
+    validFilesMap,
+    iosStringKeys,
   );
 }

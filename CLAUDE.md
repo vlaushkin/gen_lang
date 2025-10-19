@@ -24,6 +24,9 @@ dart run bin/generate.dart --source-dir=res/string --output-dir=lib/generated --
 - `--source-dir`: Source folder with JSON files (default: `res/string`)
 - `--output-dir`: Output folder for generated files (default: `lib/generated`)
 - `--template-locale`: Template locale for default values (default: `en`)
+- `--android-dir`: Path to Android project directory (default: `android`)
+- `--android-flavor`: Android build flavor (default: `main`)
+- `--ios-dir`: Path to iOS project directory (default: `ios`)
 
 ### Development
 ```bash
@@ -100,6 +103,8 @@ lib/
 ├── extra_json_message_tool.dart # Parameter extraction and string utilities
 ├── generate_i18n_dart.dart    # Generates i18n.dart (S class and delegate)
 ├── generate_message_all.dart  # Generates messages_all.dart (message lookups)
+├── generate_android_xml.dart  # Generates Android XML strings
+├── generate_ios_strings.dart  # Generates iOS .strings files
 ├── locale_info.dart           # Comprehensive locale database
 └── print_tool.dart            # Console output utilities
 
@@ -150,6 +155,168 @@ S.of(context).messageWithParams('John')
 S.of(context).pluralMessage(5, 'arg2')
 S.of(context).genderMessage('female', 'Jane')
 ```
+
+## Native Platform Strings Generation
+
+In addition to Dart code generation for Flutter, gen_lang can generate native string resources for Android and iOS platforms.
+
+### Android Strings Generation
+
+To generate Android XML strings, create an `android_strings.json` file in your source directory that lists which translation keys should be exported to native Android resources:
+
+**Example `android_strings.json`:**
+```json
+[
+  "app_name",
+  "simpleMessage",
+  "messageWithParams"
+]
+```
+
+**Generated Output:**
+- Files: `android/app/src/{flavor}/res/values*/generated_strings.xml`
+- Format: Android XML resource files
+- Location pattern:
+  - `values/generated_strings.xml` (default locale: `en`)
+  - `values-{lang}/generated_strings.xml` (language-specific)
+  - `values-{lang}-r{COUNTRY}/generated_strings.xml` (region-specific, e.g., `values-zh-rTW`)
+
+**Limitations:**
+- Only simple message types are supported (no plural/gender messages)
+- Messages with parameters (`${param}`) are included but parameters remain in Flutter format
+
+**Implementation Details:**
+- **Code**: `lib/generate_android_xml.dart`
+- **Entry Point**: `core_18n.dart:253-277` (`_handleGenerateAndroidStrings`)
+- **Escaping**: XML special characters (`&<>"'`) and escape sequences (`\n`, `\t`) are properly escaped
+
+**Using in Android Studio:**
+
+The generated files are automatically recognized by Android if placed correctly. No manual import needed!
+
+1. **Verify files are generated** in `android/app/src/{flavor}/res/values*/generated_strings.xml`
+
+2. **Sync Gradle** (if needed):
+   - In Android Studio: File → Sync Project with Gradle Files
+
+3. **Use in Kotlin Code**:
+   ```kotlin
+   // Access localized strings
+   val message = getString(R.string.simpleMessage)
+   val paramMessage = getString(R.string.messageWithParams)
+
+   // For strings with parameters, use String formatting
+   val formatted = String.format(paramMessage, "John")
+   ```
+
+4. **Use in Java**:
+   ```java
+   String message = getString(R.string.simpleMessage);
+   String paramMessage = getString(R.string.messageWithParams);
+
+   // For strings with parameters
+   String formatted = String.format(paramMessage, "John");
+   ```
+
+5. **Use in XML layouts**:
+   ```xml
+   <TextView
+       android:text="@string/simpleMessage"
+       android:layout_width="wrap_content"
+       android:layout_height="wrap_content" />
+   ```
+
+**Note**: The generated `generated_strings.xml` files are automatically merged with other string resources. Multiple `strings.xml` files in the same `values*` directory are combined by Android's build system.
+
+**Re-generation**: Add generated files to `.gitignore` and regenerate as part of your build process, or regenerate manually when translations change.
+
+### iOS Strings Generation
+
+To generate iOS `.strings` files, create an `ios_strings.json` file in your source directory that lists which translation keys should be exported to native iOS resources:
+
+**Example `ios_strings.json`:**
+```json
+[
+  "app_name",
+  "simpleMessage",
+  "messageWithParams"
+]
+```
+
+**Generated Output:**
+- Files: `ios/Runner/Resources/{locale}.lproj/Localizable.strings`
+- Format: iOS `.strings` files
+- Location pattern:
+  - `en.lproj/Localizable.strings` (English)
+  - `zh-TW.lproj/Localizable.strings` (region-specific)
+
+**Limitations:**
+- Only simple message types are supported (no plural/gender messages)
+- Messages with parameters (`${param}`) are included but parameters remain in Flutter format
+
+**Implementation Details:**
+- **Code**: `lib/generate_ios_strings.dart`
+- **Entry Point**: `core_18n.dart:288-310` (`_handleGenerateIosStrings`)
+- **Escaping**: Special characters (`\"`, `\\`, `\n`, `\r`, `\t`) are properly escaped for iOS format
+- **Locale Conversion**: Underscores in locale names are converted to hyphens (e.g., `zh_TW` → `zh-TW.lproj`)
+- **Auto-creation**: The `Resources` directory is automatically created if it doesn't exist (requires `ios/Runner` to exist)
+
+**Using in Xcode:**
+
+After generation, you need to add the files to your Xcode project:
+
+1. **Open Xcode Project**:
+   ```bash
+   open ios/Runner.xcworkspace
+   ```
+
+2. **Add .lproj folders to Xcode**:
+   - In Xcode, right-click on the `Runner` folder in Project Navigator
+   - Select "Add Files to Runner..."
+   - Navigate to `ios/Runner/Resources/`
+   - Select all `.lproj` folders (e.g., `en.lproj`, `zh-TW.lproj`)
+   - **Important**: Check "Create folder references" (not "Create groups")
+   - Click "Add"
+
+3. **Configure Project Localizations** (if needed):
+   - Select the project in Project Navigator
+   - Go to the "Info" tab
+   - Under "Localizations", click "+" to add languages
+   - Add all languages you're supporting (en, zh-Hans, zh-Hant, etc.)
+
+4. **Use in Swift Code**:
+   ```swift
+   // Access localized strings
+   let message = NSLocalizedString("simpleMessage", comment: "")
+   let paramMessage = NSLocalizedString("messageWithParams", comment: "")
+
+   // For strings with parameters, use String formatting
+   let formatted = String(format: paramMessage, "John")
+   ```
+
+5. **Use in Objective-C**:
+   ```objc
+   NSString *message = NSLocalizedString(@"simpleMessage", @"");
+   NSString *paramMessage = NSLocalizedString(@"messageWithParams", @"");
+
+   // For strings with parameters
+   NSString *formatted = [NSString stringWithFormat:paramMessage, @"John"];
+   ```
+
+**Note**: The generated files use standard iOS `Localizable.strings` format, so they work seamlessly with `NSLocalizedString()` without any additional configuration.
+
+**Re-generation**: Since files are auto-generated, you should add them to `.gitignore` and regenerate them as part of your build process, or regenerate manually when translations change.
+
+### Configuration Files
+
+Both `android_strings.json` and `ios_strings.json`:
+- Are placed in the source directory (default: `res/string`)
+- Are automatically excluded from locale file processing
+- Support two formats:
+  - Array of strings: `["key1", "key2"]`
+  - Object with keys property: `{"keys": ["key1", "key2"]}`
+
+If these files don't exist or are empty, native platform generation is skipped automatically.
 
 ## Key Implementation Notes
 
