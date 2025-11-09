@@ -42,18 +42,17 @@ Future<void> generateIosStrings(
   Map<String, FileSystemEntity> validFilesMap,
   Set<String> iosStringKeys,
 ) async {
-  // Check if iOS Runner directory exists
-  String runnerPath = path.join(iosDir, 'Runner');
-  Directory runnerDir = Directory(runnerPath);
+  // Check if iOS directory exists
+  Directory iosDirEntity = Directory(iosDir);
 
-  if (!runnerDir.existsSync()) {
-    printWarning('iOS Runner directory not found: $runnerPath');
+  if (!iosDirEntity.existsSync()) {
+    printWarning('iOS directory not found: $iosDir');
     printWarning('Skipping iOS strings generation');
     return;
   }
 
   // Create Resources directory if it doesn't exist
-  String resourcesPath = path.join(runnerPath, 'Resources');
+  String resourcesPath = path.join(iosDir, 'Resources');
   Directory resourcesDir = Directory(resourcesPath);
 
   if (!resourcesDir.existsSync()) {

@@ -26,7 +26,7 @@ dart run bin/generate.dart --source-dir=res/string --output-dir=lib/generated --
 - `--template-locale`: Template locale for default values (default: `en`)
 - `--android-dir`: Path to Android project directory (default: `android`)
 - `--android-flavor`: Android build flavor (default: `main`)
-- `--ios-dir`: Path to iOS project directory (default: `ios`)
+- `--ios-dir`: Path to iOS project directory (default: `ios/Runner`)
 
 ### Development
 ```bash
@@ -244,7 +244,7 @@ To generate iOS `.strings` files, create an `ios_strings.json` file in your sour
 ```
 
 **Generated Output:**
-- Files: `ios/Runner/Resources/{locale}.lproj/Localizable.strings`
+- Files: `{ios-dir}/Resources/{locale}.lproj/Localizable.strings`
 - Format: iOS `.strings` files
 - Location pattern:
   - `en.lproj/Localizable.strings` (English)
@@ -259,7 +259,7 @@ To generate iOS `.strings` files, create an `ios_strings.json` file in your sour
 - **Entry Point**: `core_18n.dart:288-310` (`_handleGenerateIosStrings`)
 - **Escaping**: Special characters (`\"`, `\\`, `\n`, `\r`, `\t`) are properly escaped for iOS format
 - **Locale Conversion**: Underscores in locale names are converted to hyphens (e.g., `zh_TW` → `zh-TW.lproj`)
-- **Auto-creation**: The `Resources` directory is automatically created if it doesn't exist (requires `ios/Runner` to exist)
+- **Auto-creation**: The `Resources` directory is automatically created if it doesn't exist (requires the directory specified by `--ios-dir` to exist, default: `ios/Runner`)
 
 **Using in Xcode:**
 
@@ -273,7 +273,7 @@ After generation, you need to add the files to your Xcode project:
 2. **Add .lproj folders to Xcode**:
    - In Xcode, right-click on the `Runner` folder in Project Navigator
    - Select "Add Files to Runner..."
-   - Navigate to `ios/Runner/Resources/`
+   - Navigate to `{ios-dir}/Resources/` (default: `ios/Runner/Resources/`)
    - Select all `.lproj` folders (e.g., `en.lproj`, `zh-TW.lproj`)
    - **Important**: Check "Create folder references" (not "Create groups")
    - Click "Add"
