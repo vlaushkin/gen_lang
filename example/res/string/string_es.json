@@ -7,5 +7,12 @@
   "pluralMessageOne":"Hola ${interviewerName}, tengo un año de experiencia laboral.",
   "pluralMessagePOther":"Hola ${interviewerName}, Tengo ${howMany} años de experiencia laboral.",
   "simpleMessage":"Este es un mensaje sencillo",
-  "specialCharactersMessage":"Caracteres Especiales Buenos Desarrolladores \"Mensaje\"\n Siguiente Línea"
+  "specialCharactersMessage":"Caracteres Especiales Buenos Desarrolladores \"Mensaje\"\n Siguiente Línea",
+  "web_sharing__app__name":"Hábitos Diarios",
+  "web_sharing__app__tagline":"Rastrea tus hábitos, construye mejores rutinas",
+  "web_sharing__loading__text":"Cargando lista compartida...",
+  "web_sharing__preview__tasks":"Tareas",
+  "web_sharing__preview__no_tasks":"Aún no hay tareas",
+  "web_sharing__error__not_found__title":"Lista No Encontrada",
+  "web_sharing__error__not_found__message":"Esta lista compartida no existe o ha sido eliminada."
 }

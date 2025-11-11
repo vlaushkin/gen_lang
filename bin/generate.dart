@@ -59,5 +59,9 @@ ArgParser _generateArgParser(I18nOption? i18nOption) {
       callback: (String? x) => i18nOption!.iosDir = x,
       help: 'Path to iOS project directory (relative to current directory)');
 
+  parser.addOption('web-dir',
+      callback: (String? x) => i18nOption!.webDir = x,
+      help: 'Path to Web locales directory (relative to current directory). If not specified, Web generation is skipped');
+
   return parser;
 }

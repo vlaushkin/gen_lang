@@ -7,5 +7,12 @@
   "pluralMessageOne":"Hi ${interviewerName}, I have one year working experience.",
   "pluralMessagePOther":"Hi ${interviewerName}, I have ${howMany} years of working experience.",
   "simpleMessage":"This is a simple Message",
-  "specialCharactersMessage":"Special Characters Nice Developer's \"Message\"\n Next Line"
+  "specialCharactersMessage":"Special Characters Nice Developer's \"Message\"\n Next Line",
+  "web_sharing__app__name":"Daily Habits",
+  "web_sharing__app__tagline":"Track your habits, build better routines",
+  "web_sharing__loading__text":"Loading shared list...",
+  "web_sharing__preview__tasks":"Tasks",
+  "web_sharing__preview__no_tasks":"No tasks yet",
+  "web_sharing__error__not_found__title":"List Not Found",
+  "web_sharing__error__not_found__message":"This shared list does not exist or has been deleted."
 }

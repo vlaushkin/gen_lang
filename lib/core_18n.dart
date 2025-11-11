@@ -8,6 +8,7 @@ import 'package:gen_lang/generate_android_xml.dart';
 import 'package:gen_lang/generate_i18n_dart.dart';
 import 'package:gen_lang/generate_ios_strings.dart';
 import 'package:gen_lang/generate_message_all.dart';
+import 'package:gen_lang/generate_web_json.dart';
 import 'package:gen_lang/locale_info.dart';
 import 'package:gen_lang/print_tool.dart';
 import 'package:path/path.dart' as path;
@@ -19,10 +20,11 @@ class I18nOption {
   String? androidDir;
   String? androidFlavor;
   String? iosDir;
+  String? webDir;
 
   @override
   String toString() {
-    return 'I18nOption{sourceDir: $sourceDir, templateLocale: $templateLocale, outputDir: $outputDir, androidDir: $androidDir, androidFlavor: $androidFlavor, iosDir: $iosDir}';
+    return 'I18nOption{sourceDir: $sourceDir, templateLocale: $templateLocale, outputDir: $outputDir, androidDir: $androidDir, androidFlavor: $androidFlavor, iosDir: $iosDir, webDir: $webDir}';
   }
 }
 
@@ -77,6 +79,13 @@ void handleGenerateI18nFiles(I18nOption option) async {
         current.path,
         option.sourceDir!,
         option.iosDir!,
+        validFilesMap);
+
+    // Generate Web strings if web_strings.json exists and --web-dir is specified
+    await _handleGenerateWebStrings(
+        current.path,
+        option.sourceDir!,
+        option.webDir,
         validFilesMap);
   }
 }
@@ -306,5 +315,34 @@ Future<void> _handleGenerateIosStrings(
     path.join(currentPath, iosDir),
     validFilesMap,
     iosStringKeys,
+  );
+}
+
+Future<void> _handleGenerateWebStrings(
+    String currentPath,
+    String sourceDir,
+    String? webDir,
+    Map<String, FileSystemEntity> validFilesMap) async {
+  // Skip if --web-dir is not specified
+  if (webDir == null || webDir.isEmpty) {
+    return;
+  }
+
+  // Read web_strings.json config
+  Set<String>? webStringKeys =
+      await readWebStringsConfig(path.join(currentPath, sourceDir));
+
+  if (webStringKeys == null || webStringKeys.isEmpty) {
+    // No web_strings.json or it's empty - skip Web generation
+    return;
+  }
+
+  printInfo('Found ${webStringKeys.length} keys in web_strings.json');
+
+  // Generate Web strings
+  await generateWebStrings(
+    path.join(currentPath, webDir),
+    validFilesMap,
+    webStringKeys,
   );
 }

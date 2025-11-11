@@ -27,6 +27,7 @@ dart run bin/generate.dart --source-dir=res/string --output-dir=lib/generated --
 - `--android-dir`: Path to Android project directory (default: `android`)
 - `--android-flavor`: Android build flavor (default: `main`)
 - `--ios-dir`: Path to iOS project directory (default: `ios/Runner`)
+- `--web-dir`: Path to Web locales directory (optional, no default - if not specified, Web generation is skipped)
 
 ### Development
 ```bash
@@ -105,6 +106,7 @@ lib/
 ├── generate_message_all.dart  # Generates messages_all.dart (message lookups)
 ├── generate_android_xml.dart  # Generates Android XML strings
 ├── generate_ios_strings.dart  # Generates iOS .strings files
+├── generate_web_json.dart     # Generates Web JSON files with nested structure
 ├── locale_info.dart           # Comprehensive locale database
 └── print_tool.dart            # Console output utilities
 
@@ -307,16 +309,111 @@ After generation, you need to add the files to your Xcode project:
 
 **Re-generation**: Since files are auto-generated, you should add them to `.gitignore` and regenerate them as part of your build process, or regenerate manually when translations change.
 
+### Web Strings Generation
+
+To generate Web JSON files, create a `web_strings.json` file in your source directory that lists which translation keys should be exported to Web resources:
+
+**Example `web_strings.json`:**
+```json
+[
+  "web_sharing__app__name",
+  "web_sharing__app__tagline",
+  "web_sharing__loading__text",
+  "web_sharing__preview__tasks"
+]
+```
+
+**Key Naming Convention:**
+
+Web keys use a special naming convention with double underscores (`__`) to create nested JSON structure:
+- Single underscore (`_`): Converted from snake_case to camelCase within a segment
+- Double underscore (`__`): Creates a new nesting level
+
+**Examples:**
+- `web_sharing__app__name` → `{"webSharing": {"app": {"name": "..."}}}`
+- `web_sharing__loading__text` → `{"webSharing": {"loading": {"text": "..."}}}`
+- `web_error__not_found__message` → `{"webError": {"notFound": {"message": "..."}}}`
+
+**Generated Output:**
+- Files: `{web-dir}/{locale}.json`
+- Format: Nested JSON structure with camelCase keys
+- Location pattern:
+  - `en.json` (English)
+  - `es.json` (Spanish)
+  - `zh-TW.json` (region-specific, converted from `zh_TW`)
+
+**Limitations:**
+- Only simple message types are supported (no plural/gender messages)
+- Messages with parameters (`${param}`) are included as-is
+
+**Implementation Details:**
+- **Code**: `lib/generate_web_json.dart`
+- **Entry Point**: `core_18n.dart:321-348` (`_handleGenerateWebStrings`)
+- **Key Parsing**: Splits by `__` for nesting, converts each segment from snake_case to camelCase
+- **Locale Conversion**: Underscores in locale names are converted to hyphens (e.g., `zh_TW` → `zh-TW.json`)
+- **Conditional Generation**: Only generates files if `--web-dir` parameter is specified and non-empty
+
+**Using in Web Projects:**
+
+The generated JSON files can be used with any i18n library (react-i18next, vue-i18n, etc.):
+
+1. **React (react-i18next)**:
+   ```javascript
+   import en from './locales/en.json';
+   import es from './locales/es.json';
+
+   i18n.use(initReactI18next).init({
+     resources: {
+       en: { translation: en },
+       es: { translation: es }
+     },
+     lng: 'en'
+   });
+
+   // Usage
+   const { t } = useTranslation();
+   t('webSharing.app.name'); // "Daily Habits"
+   ```
+
+2. **Vue (vue-i18n)**:
+   ```javascript
+   import en from './locales/en.json';
+   import es from './locales/es.json';
+
+   const i18n = createI18n({
+     locale: 'en',
+     messages: { en, es }
+   });
+
+   // Usage in template
+   {{ $t('webSharing.app.name') }}
+   ```
+
+**Command-Line Usage:**
+```bash
+# Generate Web JSON files
+dart run bin/generate.dart --web-dir=web/locales
+
+# With other parameters
+dart run bin/generate.dart \
+  --source-dir=res/string \
+  --web-dir=public/locales
+```
+
+**Note**: If `--web-dir` is not specified, Web generation is automatically skipped. The directory must exist before running the generator.
+
+**Re-generation**: Add generated files to `.gitignore` and regenerate them as part of your build process, or regenerate manually when translations change.
+
 ### Configuration Files
 
-Both `android_strings.json` and `ios_strings.json`:
+All configuration files (`android_strings.json`, `ios_strings.json`, and `web_strings.json`):
 - Are placed in the source directory (default: `res/string`)
 - Are automatically excluded from locale file processing
 - Support two formats:
   - Array of strings: `["key1", "key2"]`
   - Object with keys property: `{"keys": ["key1", "key2"]}`
 
-If these files don't exist or are empty, native platform generation is skipped automatically.
+If these files don't exist or are empty, their respective platform generation is skipped automatically. Additionally, for Web generation, the `--web-dir` parameter must be specified for generation to occur.
 
 ## Key Implementation Notes
 
